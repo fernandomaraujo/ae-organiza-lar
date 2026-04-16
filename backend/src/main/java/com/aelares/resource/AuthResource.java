@@ -2,14 +2,18 @@ package com.aelares.resource;
 
 import com.aelares.dto.request.LoginRequest;
 import com.aelares.dto.request.VerifyCodeRequest;
-import com.aelares.dto.response.LoginResponse;
 import com.aelares.dto.response.ErrorResponse;
+import com.aelares.dto.response.LoginResponse;
+import com.aelares.dto.response.UserResponse;
+import com.aelares.entity.User;
 import com.aelares.service.AuthService;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
 
 @Path("/api/v1/auth")
 @Produces(MediaType.APPLICATION_JSON)
@@ -19,14 +23,12 @@ public class AuthResource {
     @Inject
     AuthService authService;
 
-    /**
-     * POST /api/v1/auth/login - Envia código OTP por email
-     */
     @POST
-    @Path("/login")
-    public Response login(@Valid LoginRequest request) {
+    @Path("/request-code")
+    public Response requestCode(@Valid LoginRequest request,
+                                @HeaderParam("X-Forwarded-For") String forwardedFor) {
         try {
-            authService.sendOtpCode(request.email);
+            authService.requestCode(request.email, forwardedFor);
 
             return Response
                 .ok(new LoginResponse(
@@ -45,22 +47,24 @@ public class AuthResource {
         }
     }
 
-    /**
-     * POST /api/v1/auth/verify - Verifica código OTP e retorna JWT token
-     */
     @POST
-    @Path("/verify")
+    @Path("/verify-code")
     public Response verifyCode(@Valid VerifyCodeRequest request) {
         try {
-            String token = authService.verifyOtpAndGetToken(request.email, request.code);
+            AuthService.AuthResult authResult = authService.verifyCode(request.email, request.code);
+            String token = authResult.token();
+            User user = authResult.user();
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("token", token);
+            body.put("tokenType", "Bearer");
+            body.put("message", "Login realizado com sucesso");
+            body.put("user", new UserResponse(user.id, user.email, user.name, user.createdAt, user.lastLogin, null));
 
             return Response
                 .ok()
                 .header("Authorization", "Bearer " + token)
-                .entity(new java.util.HashMap<String, String>() {{
-                    put("token", token);
-                    put("message", "Login realizado com sucesso");
-                }})
+                .entity(body)
                 .build();
         } catch (com.aelares.exception.UnauthorizedException e) {
             return Response
@@ -81,6 +85,19 @@ public class AuthResource {
         }
     }
 
+    @POST
+    @Path("/login")
+    public Response login(@Valid LoginRequest request,
+                          @HeaderParam("X-Forwarded-For") String forwardedFor) {
+        return requestCode(request, forwardedFor);
+    }
+
+    @POST
+    @Path("/verify")
+    public Response verify(@Valid VerifyCodeRequest request) {
+        return verifyCode(request);
+    }
+
     /**
      * POST /api/v1/auth/validate - Valida se o token é válido
      */
@@ -88,21 +105,21 @@ public class AuthResource {
     @Path("/validate")
     public Response validateToken(@HeaderParam("Authorization") String authHeader) {
         try {
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            String token = extractBearerToken(authHeader);
+            if (token == null) {
                 return Response
                     .status(Response.Status.UNAUTHORIZED)
                     .entity(new ErrorResponse("Token não fornecido", 401))
                     .build();
             }
 
-            String token = authHeader.substring(7);
             boolean isValid = authService.isTokenValid(token);
 
             if (isValid) {
-                return Response.ok(new java.util.HashMap<String, Object>() {{
-                    put("valid", true);
-                    put("message", "Token válido");
-                }}).build();
+                Map<String, Object> body = new HashMap<>();
+                body.put("valid", true);
+                body.put("message", "Token válido");
+                return Response.ok(body).build();
             } else {
                 return Response
                     .status(Response.Status.UNAUTHORIZED)
@@ -115,6 +132,34 @@ public class AuthResource {
                 .entity(new ErrorResponse(e.getMessage(), 401))
                 .build();
         }
+    }
+
+    @GET
+    @Path("/me")
+    public Response me(@HeaderParam("Authorization") String authHeader) {
+        try {
+            String token = extractBearerToken(authHeader);
+            if (token == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("Token não fornecido", 401))
+                    .build();
+            }
+
+            User user = authService.getUserFromToken(token);
+            UserResponse response = new UserResponse(user.id, user.email, user.name, user.createdAt, user.lastLogin, null);
+            return Response.ok(response).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                .entity(new ErrorResponse("Token inválido", 401))
+                .build();
+        }
+    }
+
+    private String extractBearerToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        return authHeader.substring(7);
     }
 }
 
