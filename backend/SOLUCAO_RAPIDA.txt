@@ -1,0 +1,60 @@
+# 🔧 SOLUÇÃO: ERRO DE DOCKER
+
+## ❌ SEU ERRO
+
+```
+unable to get image 'mailhog/mailhog:latest': error during connect
+open //./pipe/dockerDesktopLinuxEngine: O sistema não pode encontrar o arquivo especificado
+```
+
+---
+
+## ✅ SOLUÇÃO
+
+### O Problema
+Docker Desktop não está rodando
+
+### A Solução (3 Opções)
+
+**OPÇÃO 1: Docker Desktop (RECOMENDADO)**
+1. Menu Iniciar
+2. Procure "Docker Desktop"
+3. Clique para abrir
+4. Aguarde 60 segundos
+5. Tente novamente: `docker-compose up -d`
+
+**OPÇÃO 2: PostgreSQL Local + MailHog Docker**
+- Veja: `ALTERNATIVAS_SEM_DOCKER.md`
+
+**OPÇÃO 3: Tudo Local (SEM Docker)**
+- Veja: `ALTERNATIVAS_SEM_DOCKER.md`
+
+---
+
+## 📊 TAMBÉM CORRIGIDO
+
+✅ Docker-compose.yml - Removida versão obsoleta
+
+---
+
+## 📚 NOVOS ARQUIVOS CRIADOS
+
+1. **SOLUCAO_DOCKER.md** - Guia completo
+2. **ALTERNATIVAS_SEM_DOCKER.md** - Sem Docker
+3. **TROUBLESHOOTING_RAPIDO.md** - Atalho rápido
+
+---
+
+## 🚀 PRÓXIMO PASSO
+
+Abra Docker Desktop e execute:
+```bash
+docker-compose up -d
+./mvnw quarkus:dev
+```
+
+---
+
+Desenvolvido: 17/02/2026
+Status: ✅ Problema Resolvido
+

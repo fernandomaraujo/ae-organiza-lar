@@ -1,0 +1,44 @@
+# Maven
+target/
+*.jar
+*.war
+*.rar
+*.class
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+.settings/
+*.iml
+
+# Build
+.quarkus/
+bin/
+dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Temp files
+*.tmp
+*.bak
+
+# OS
+Thumbs.db
+.DS_Store
+
+# JVM
+.java-version
+

@@ -1,0 +1,37 @@
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: aelares-postgres
+    environment:
+      POSTGRES_DB: aelares_db
+      POSTGRES_USER: aelares_user
+      POSTGRES_PASSWORD: aelares_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - aelares-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U aelares_user -d aelares_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: aelares-mailhog
+    ports:
+      - "1025:1025"      # SMTP server
+      - "8025:8025"      # Web UI
+    networks:
+      - aelares-network
+
+volumes:
+  postgres_data:
+
+networks:
+  aelares-network:
+    driver: bridge
+
