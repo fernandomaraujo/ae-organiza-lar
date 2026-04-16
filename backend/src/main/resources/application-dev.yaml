@@ -3,6 +3,11 @@ quarkus:
     name: ae-organiza-lar
     version: 1.0.0
 
+  # OpenAPI / Swagger UI — sempre visível em dev
+  swagger-ui:
+    always-include: true
+    path: /swagger-ui
+
   # Database Configuration (Development)
   datasource:
     db-kind: postgresql

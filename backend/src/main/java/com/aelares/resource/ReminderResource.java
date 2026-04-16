@@ -12,6 +12,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +24,7 @@ import java.util.UUID;
 @Path("/api/v1/reminders")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Lembretes", description = "Envio do planejamento semanal por e-mail")
 public class ReminderResource {
 
     @Inject
@@ -101,4 +105,3 @@ public class ReminderResource {
         return authService.getUserFromToken(authHeader.substring(7));
     }
 }
-

@@ -148,6 +148,12 @@
         </dependency>
 
         <!-- Reactive Messaging removido: não utilizado no projeto -->
+
+        <!-- OpenAPI / Swagger UI -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-openapi</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

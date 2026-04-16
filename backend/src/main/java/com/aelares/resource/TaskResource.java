@@ -12,12 +12,17 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import java.util.List;
 import java.util.UUID;
 
 @Path("/api/v1/homes/{homeId}/tasks")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Tarefas", description = "Afazeres domésticos por lar e dia da semana")
 public class TaskResource {
 
     @Inject
@@ -206,4 +211,3 @@ public class TaskResource {
         return authService.extractUserIdFromToken(token);
     }
 }
-

@@ -3,6 +3,18 @@ quarkus:
     name: ae-organiza-lar
     version: 1.0.0
 
+  # OpenAPI / Swagger UI
+  smallrye-openapi:
+    info-title: "AE Organiza Lar API"
+    info-version: "1.0.0"
+    info-description: "API para gerenciamento de afazeres domésticos por lar. Login por código enviado ao e-mail — sem senhas armazenadas."
+    info-contact-name: "AE Lares"
+    info-contact-email: "contato@aelares.com"
+  swagger-ui:
+    always-include: true
+    path: /swagger-ui
+    title: "AE Organiza Lar — Swagger UI"
+
   # Database Configuration
   datasource:
     db-kind: postgresql

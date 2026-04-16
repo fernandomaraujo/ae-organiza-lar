@@ -12,12 +12,19 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import java.util.HashMap;
 import java.util.Map;
 
 @Path("/api/v1/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Autenticação", description = "Login sem senha via código enviado ao e-mail")
 public class AuthResource {
 
     @Inject
@@ -25,6 +32,10 @@ public class AuthResource {
 
     @POST
     @Path("/request-code")
+    @Operation(summary = "Solicitar código de acesso",
+               description = "Envia um código OTP de 6 dígitos para o e-mail informado. Expira em 15 minutos.")
+    @APIResponse(responseCode = "200", description = "Código enviado com sucesso")
+    @APIResponse(responseCode = "429", description = "Muitas tentativas — aguarde alguns minutos")
     public Response requestCode(@Valid LoginRequest request,
                                 @HeaderParam("X-Forwarded-For") String forwardedFor) {
         try {
@@ -49,6 +60,10 @@ public class AuthResource {
 
     @POST
     @Path("/verify-code")
+    @Operation(summary = "Verificar código e obter token",
+               description = "Valida o código OTP e retorna um JWT Bearer token. Cria o usuário automaticamente no primeiro acesso.")
+    @APIResponse(responseCode = "200", description = "Login realizado — token retornado no corpo e no header Authorization")
+    @APIResponse(responseCode = "401", description = "Código inválido, expirado ou já utilizado")
     public Response verifyCode(@Valid VerifyCodeRequest request) {
         try {
             AuthService.AuthResult authResult = authService.verifyCode(request.email, request.code);
@@ -87,6 +102,7 @@ public class AuthResource {
 
     @POST
     @Path("/login")
+    @Operation(summary = "Alias para /request-code", description = "Mantido por compatibilidade.")
     public Response login(@Valid LoginRequest request,
                           @HeaderParam("X-Forwarded-For") String forwardedFor) {
         return requestCode(request, forwardedFor);
@@ -94,6 +110,7 @@ public class AuthResource {
 
     @POST
     @Path("/verify")
+    @Operation(summary = "Alias para /verify-code", description = "Mantido por compatibilidade.")
     public Response verify(@Valid VerifyCodeRequest request) {
         return verifyCode(request);
     }
@@ -103,6 +120,9 @@ public class AuthResource {
      */
     @POST
     @Path("/validate")
+    @Operation(summary = "Validar token JWT", description = "Verifica se o Bearer token ainda é válido.")
+    @APIResponse(responseCode = "200", description = "Token válido")
+    @APIResponse(responseCode = "401", description = "Token inválido ou ausente")
     public Response validateToken(@HeaderParam("Authorization") String authHeader) {
         try {
             String token = extractBearerToken(authHeader);
@@ -136,6 +156,10 @@ public class AuthResource {
 
     @GET
     @Path("/me")
+    @Operation(summary = "Dados do usuário autenticado",
+               description = "Retorna o perfil do usuário dono do token Bearer fornecido.")
+    @APIResponse(responseCode = "200", description = "Perfil do usuário")
+    @APIResponse(responseCode = "401", description = "Token ausente ou inválido")
     public Response me(@HeaderParam("Authorization") String authHeader) {
         try {
             String token = extractBearerToken(authHeader);
