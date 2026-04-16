@@ -147,11 +147,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Reactive Messaging -->
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-reactive-messaging</artifactId>
-        </dependency>
+        <!-- Reactive Messaging removido: não utilizado no projeto -->
     </dependencies>
 
     <build>
