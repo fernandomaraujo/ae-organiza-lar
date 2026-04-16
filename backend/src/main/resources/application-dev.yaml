@@ -54,6 +54,9 @@ app:
   auth:
     token-expiration-minutes: 10080  # 7 days
     otp-expiration-minutes: 15
+    otp-request-window-minutes: 10
+    otp-request-max-attempts: 5
+    otp-request-max-attempts-per-ip: 20
     jwt-secret: dev-secret-key-change-in-production
 
   email:

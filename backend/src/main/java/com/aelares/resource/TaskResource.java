@@ -1,7 +1,9 @@
 package com.aelares.resource;
 
 import com.aelares.dto.request.CreateTaskRequest;
+import com.aelares.dto.response.ErrorResponse;
 import com.aelares.dto.response.TaskResponse;
+import com.aelares.exception.UnauthorizedException;
 import com.aelares.service.AuthService;
 import com.aelares.service.HomeService;
 import com.aelares.service.TaskService;
@@ -50,11 +52,17 @@ public class TaskResource {
 
             return Response.ok(tasks).build();
         } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(new ErrorResponse("ID invalido", Response.Status.BAD_REQUEST.getStatusCode()))
+                .build();
         } catch (com.aelares.exception.ResourceNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
+                .build();
+        } catch (UnauthorizedException e) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                .build();
         }
     }
 
@@ -75,15 +83,17 @@ public class TaskResource {
 
             return Response.status(Response.Status.CREATED).entity(task).build();
         } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(new ErrorResponse("ID invalido", Response.Status.BAD_REQUEST.getStatusCode()))
+                .build();
         } catch (com.aelares.exception.ResourceNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
+                .build();
+        } catch (UnauthorizedException e) {
             return Response
-                .status(Response.Status.BAD_REQUEST)
-                .entity(new java.util.HashMap<String, String>() {{
-                    put("message", e.getMessage());
-                }})
+                .status(Response.Status.UNAUTHORIZED)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
                 .build();
         }
     }
@@ -107,11 +117,17 @@ public class TaskResource {
 
             return Response.ok(task).build();
         } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(new ErrorResponse("ID invalido", Response.Status.BAD_REQUEST.getStatusCode()))
+                .build();
         } catch (com.aelares.exception.ResourceNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
+                .build();
+        } catch (UnauthorizedException e) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                .build();
         }
     }
 
@@ -135,11 +151,17 @@ public class TaskResource {
 
             return Response.ok(task).build();
         } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(new ErrorResponse("ID invalido", Response.Status.BAD_REQUEST.getStatusCode()))
+                .build();
         } catch (com.aelares.exception.ResourceNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
+                .build();
+        } catch (UnauthorizedException e) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                .build();
         }
     }
 
@@ -162,17 +184,23 @@ public class TaskResource {
 
             return Response.noContent().build();
         } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(new ErrorResponse("ID invalido", Response.Status.BAD_REQUEST.getStatusCode()))
+                .build();
         } catch (com.aelares.exception.ResourceNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
+                .build();
+        } catch (UnauthorizedException e) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                .build();
         }
     }
 
-    private UUID extractUserIdFromToken(String authHeader) throws Exception {
+    private UUID extractUserIdFromToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new Exception("Token não fornecido");
+            throw new UnauthorizedException("Token nao fornecido");
         }
         String token = authHeader.substring(7);
         return authService.extractUserIdFromToken(token);

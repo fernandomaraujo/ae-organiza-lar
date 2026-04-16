@@ -2,6 +2,7 @@ package com.aelares.service;
 
 import com.aelares.entity.AuthToken;
 import com.aelares.entity.User;
+import com.aelares.exception.TooManyRequestsException;
 import com.aelares.exception.ResourceNotFoundException;
 import com.aelares.exception.UnauthorizedException;
 import io.jsonwebtoken.Jwts;
@@ -35,12 +36,23 @@ public class AuthService {
     @ConfigProperty(name = "app.auth.jwt-secret", defaultValue = "your-secret-key-change-in-production")
     String jwtSecret;
 
+    @ConfigProperty(name = "app.auth.otp-request-window-minutes", defaultValue = "10")
+    int otpRequestWindowMinutes;
+
+    @ConfigProperty(name = "app.auth.otp-request-max-attempts", defaultValue = "5")
+    int otpRequestMaxAttempts;
+
+    @ConfigProperty(name = "app.auth.otp-request-max-attempts-per-ip", defaultValue = "20")
+    int otpRequestMaxAttemptsPerIp;
+
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
     @Transactional
     public void requestCode(String email, String ipAddress) {
+        enforceOtpRateLimit(email, ipAddress);
+
         AuthToken.delete("email = ?1 and (usedAt is null or expiresAt < CURRENT_TIMESTAMP)", email);
 
         String code = generateOtpCode();
@@ -56,6 +68,22 @@ public class AuthService {
         authToken.persist();
 
         emailService.sendOtpEmail(email, code);
+    }
+
+    private void enforceOtpRateLimit(String email, String ipAddress) {
+        LocalDateTime windowStart = LocalDateTime.now().minusMinutes(otpRequestWindowMinutes);
+
+        long requestsByEmail = AuthToken.count("email = ?1 and createdAt >= ?2", email, windowStart);
+        if (requestsByEmail >= otpRequestMaxAttempts) {
+            throw new TooManyRequestsException("Muitas tentativas para este email. Aguarde alguns minutos e tente novamente.");
+        }
+
+        if (ipAddress != null && !ipAddress.isBlank()) {
+            long requestsByIp = AuthToken.count("ipAddress = ?1 and createdAt >= ?2", ipAddress, windowStart);
+            if (requestsByIp >= otpRequestMaxAttemptsPerIp) {
+                throw new TooManyRequestsException("Muitas tentativas deste IP. Aguarde alguns minutos e tente novamente.");
+            }
+        }
     }
 
     @Transactional

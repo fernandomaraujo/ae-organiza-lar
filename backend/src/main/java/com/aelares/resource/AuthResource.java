@@ -28,7 +28,7 @@ public class AuthResource {
     public Response requestCode(@Valid LoginRequest request,
                                 @HeaderParam("X-Forwarded-For") String forwardedFor) {
         try {
-            authService.requestCode(request.email, forwardedFor);
+            authService.requestCode(request.email, extractClientIp(forwardedFor));
 
             return Response
                 .ok(new LoginResponse(
@@ -160,6 +160,15 @@ public class AuthResource {
             return null;
         }
         return authHeader.substring(7);
+    }
+
+    private String extractClientIp(String forwardedFor) {
+        if (forwardedFor == null || forwardedFor.isBlank()) {
+            return null;
+        }
+
+        String[] parts = forwardedFor.split(",");
+        return parts[0].trim();
     }
 }
 

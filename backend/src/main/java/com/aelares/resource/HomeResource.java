@@ -1,7 +1,9 @@
 package com.aelares.resource;
 
 import com.aelares.dto.request.CreateHomeRequest;
+import com.aelares.dto.response.ErrorResponse;
 import com.aelares.dto.response.HomeResponse;
+import com.aelares.exception.UnauthorizedException;
 import com.aelares.service.AuthService;
 import com.aelares.service.HomeService;
 import jakarta.inject.Inject;
@@ -32,8 +34,10 @@ public class HomeResource {
             UUID userId = extractUserIdFromToken(authHeader);
             List<HomeResponse> homes = homeService.getHomesByUserId(userId);
             return Response.ok(homes).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+        } catch (UnauthorizedException e) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                .build();
         }
     }
 
@@ -48,12 +52,10 @@ public class HomeResource {
             UUID userId = extractUserIdFromToken(authHeader);
             HomeResponse home = homeService.createHome(userId, request);
             return Response.status(Response.Status.CREATED).entity(home).build();
-        } catch (Exception e) {
+        } catch (UnauthorizedException e) {
             return Response
-                .status(Response.Status.BAD_REQUEST)
-                .entity(new java.util.HashMap<String, String>() {{
-                    put("message", e.getMessage());
-                }})
+                .status(Response.Status.UNAUTHORIZED)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
                 .build();
         }
     }
@@ -74,11 +76,17 @@ public class HomeResource {
 
             return Response.ok(home).build();
         } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(new ErrorResponse("ID de residencia invalido", Response.Status.BAD_REQUEST.getStatusCode()))
+                .build();
         } catch (com.aelares.exception.ResourceNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
+                .build();
+        } catch (UnauthorizedException e) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                .build();
         }
     }
 
@@ -99,11 +107,17 @@ public class HomeResource {
 
             return Response.ok(home).build();
         } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(new ErrorResponse("ID de residencia invalido", Response.Status.BAD_REQUEST.getStatusCode()))
+                .build();
         } catch (com.aelares.exception.ResourceNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
+                .build();
+        } catch (UnauthorizedException e) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                .build();
         }
     }
 
@@ -123,17 +137,23 @@ public class HomeResource {
 
             return Response.noContent().build();
         } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(new ErrorResponse("ID de residencia invalido", Response.Status.BAD_REQUEST.getStatusCode()))
+                .build();
         } catch (com.aelares.exception.ResourceNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
+                .build();
+        } catch (UnauthorizedException e) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                .build();
         }
     }
 
-    private UUID extractUserIdFromToken(String authHeader) throws Exception {
+    private UUID extractUserIdFromToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new Exception("Token não fornecido");
+            throw new UnauthorizedException("Token nao fornecido");
         }
         String token = authHeader.substring(7);
         return authService.extractUserIdFromToken(token);
