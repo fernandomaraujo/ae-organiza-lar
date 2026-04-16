@@ -70,8 +70,7 @@ public class HomeResource {
             UUID homeId = UUID.fromString(id);
             UUID userId = extractUserIdFromToken(authHeader);
 
-            homeService.validateHomeOwnership(homeId, userId);
-            HomeResponse home = homeService.getHomeById(homeId);
+            HomeResponse home = homeService.getHomeById(homeId, userId);
 
             return Response.ok(home).build();
         } catch (IllegalArgumentException e) {
@@ -96,8 +95,7 @@ public class HomeResource {
             UUID homeId = UUID.fromString(id);
             UUID userId = extractUserIdFromToken(authHeader);
 
-            homeService.validateHomeOwnership(homeId, userId);
-            HomeResponse home = homeService.updateHome(homeId, request);
+            HomeResponse home = homeService.updateHome(homeId, userId, request);
 
             return Response.ok(home).build();
         } catch (IllegalArgumentException e) {
@@ -121,8 +119,7 @@ public class HomeResource {
             UUID homeId = UUID.fromString(id);
             UUID userId = extractUserIdFromToken(authHeader);
 
-            homeService.validateHomeOwnership(homeId, userId);
-            homeService.deleteHome(homeId);
+            homeService.deleteHome(homeId, userId);
 
             return Response.noContent().build();
         } catch (IllegalArgumentException e) {

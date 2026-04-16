@@ -32,15 +32,8 @@ public class HomeService {
         return toResponse(home);
     }
 
-    /**
-     * Busca residência por ID
-     */
-    public HomeResponse getHomeById(UUID homeId) {
-        Home home = Home.findById(homeId);
-        if (home == null) {
-            throw new ResourceNotFoundException("Residência não encontrada");
-        }
-        return toResponse(home);
+    public HomeResponse getHomeById(UUID homeId, UUID userId) {
+        return toResponse(findOwnedHome(homeId, userId));
     }
 
     /**
@@ -53,15 +46,9 @@ public class HomeService {
             .collect(Collectors.toList());
     }
 
-    /**
-     * Atualiza uma residência
-     */
     @Transactional
-    public HomeResponse updateHome(UUID homeId, CreateHomeRequest request) {
-        Home home = Home.findById(homeId);
-        if (home == null) {
-            throw new ResourceNotFoundException("Residência não encontrada");
-        }
+    public HomeResponse updateHome(UUID homeId, UUID userId, CreateHomeRequest request) {
+        Home home = findOwnedHome(homeId, userId);
 
         home.name = request.name;
         home.description = request.description;
@@ -71,29 +58,25 @@ public class HomeService {
         return toResponse(home);
     }
 
-    /**
-     * Deleta uma residência
-     */
     @Transactional
-    public void deleteHome(UUID homeId) {
-        Home home = Home.findById(homeId);
-        if (home == null) {
-            throw new ResourceNotFoundException("Residência não encontrada");
-        }
+    public void deleteHome(UUID homeId, UUID userId) {
+        Home home = findOwnedHome(homeId, userId);
         home.delete();
     }
 
-    /**
-     * Verifica se a residência pertence ao usuário
-     */
     public void validateHomeOwnership(UUID homeId, UUID userId) {
-        Home home = Home.findById(homeId);
+        Home home = Home.findByIdAndUserId(homeId, userId);
         if (home == null) {
             throw new ResourceNotFoundException("Residência não encontrada");
         }
-        if (!home.userId.equals(userId)) {
-            throw new ResourceNotFoundException("Acesso negado");
+    }
+
+    private Home findOwnedHome(UUID homeId, UUID userId) {
+        Home home = Home.findByIdAndUserId(homeId, userId);
+        if (home == null) {
+            throw new ResourceNotFoundException("Residência não encontrada");
         }
+        return home;
     }
 
     /**

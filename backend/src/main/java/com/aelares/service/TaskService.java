@@ -45,14 +45,8 @@ public class TaskService {
         return toResponse(task, schedule);
     }
 
-    /**
-     * Busca tarefa por ID
-     */
-    public TaskResponse getTaskById(UUID taskId) {
-        Task task = Task.findById(taskId);
-        if (task == null) {
-            throw new ResourceNotFoundException("Tarefa não encontrada");
-        }
+    public TaskResponse getTaskById(UUID homeId, UUID taskId) {
+        Task task = findTaskByHome(taskId, homeId);
 
         TaskSchedule schedule = TaskSchedule.findByTaskId(taskId);
         return toResponse(task, schedule);
@@ -90,15 +84,9 @@ public class TaskService {
             .collect(Collectors.toList());
     }
 
-    /**
-     * Atualiza uma tarefa
-     */
     @Transactional
-    public TaskResponse updateTask(UUID taskId, CreateTaskRequest request) {
-        Task task = Task.findById(taskId);
-        if (task == null) {
-            throw new ResourceNotFoundException("Tarefa não encontrada");
-        }
+    public TaskResponse updateTask(UUID homeId, UUID taskId, CreateTaskRequest request) {
+        Task task = findTaskByHome(taskId, homeId);
 
         task.title = request.title;
         task.description = request.description;
@@ -116,16 +104,18 @@ public class TaskService {
         return toResponse(task, schedule);
     }
 
-    /**
-     * Deleta uma tarefa
-     */
     @Transactional
-    public void deleteTask(UUID taskId) {
-        Task task = Task.findById(taskId);
+    public void deleteTask(UUID homeId, UUID taskId) {
+        Task task = findTaskByHome(taskId, homeId);
+        task.delete();
+    }
+
+    private Task findTaskByHome(UUID taskId, UUID homeId) {
+        Task task = Task.findByIdAndHomeId(taskId, homeId);
         if (task == null) {
             throw new ResourceNotFoundException("Tarefa não encontrada");
         }
-        task.delete();
+        return task;
     }
 
     /**

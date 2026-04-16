@@ -47,5 +47,9 @@ public class Task extends PanacheEntityBase {
     public static java.util.List<Task> findByHomeId(UUID homeId) {
         return list("homeId", homeId);
     }
+
+    public static Task findByIdAndHomeId(UUID taskId, UUID homeId) {
+        return find("id = ?1 and homeId = ?2", taskId, homeId).firstResult();
+    }
 }
 

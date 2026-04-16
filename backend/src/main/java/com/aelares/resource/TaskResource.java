@@ -103,11 +103,7 @@ public class TaskResource {
             UUID userId = extractUserIdFromToken(authHeader);
 
             homeService.validateHomeOwnership(hId, userId);
-            TaskResponse task = taskService.getTaskById(tId);
-
-            if (!task.homeId.equals(hId)) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
+            TaskResponse task = taskService.getTaskById(hId, tId);
 
             return Response.ok(task).build();
         } catch (IllegalArgumentException e) {
@@ -135,11 +131,7 @@ public class TaskResource {
             UUID userId = extractUserIdFromToken(authHeader);
 
             homeService.validateHomeOwnership(hId, userId);
-            TaskResponse task = taskService.updateTask(tId, request);
-
-            if (!task.homeId.equals(hId)) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
+            TaskResponse task = taskService.updateTask(hId, tId, request);
 
             return Response.ok(task).build();
         } catch (IllegalArgumentException e) {
@@ -166,7 +158,7 @@ public class TaskResource {
             UUID userId = extractUserIdFromToken(authHeader);
 
             homeService.validateHomeOwnership(hId, userId);
-            taskService.deleteTask(tId);
+            taskService.deleteTask(hId, tId);
 
             return Response.noContent().build();
         } catch (IllegalArgumentException e) {

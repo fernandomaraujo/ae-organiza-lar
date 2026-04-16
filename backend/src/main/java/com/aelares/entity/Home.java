@@ -47,5 +47,9 @@ public class Home extends PanacheEntityBase {
     public static java.util.List<Home> findByUserId(UUID userId) {
         return list("userId", userId);
     }
+
+    public static Home findByIdAndUserId(UUID homeId, UUID userId) {
+        return find("id = ?1 and userId = ?2", homeId, userId).firstResult();
+    }
 }
 
