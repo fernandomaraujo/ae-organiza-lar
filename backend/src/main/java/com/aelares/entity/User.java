@@ -2,7 +2,11 @@ package com.aelares.entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -27,8 +31,9 @@ public class User extends PanacheEntityBase {
     @Column(name = "last_login")
     public LocalDateTime lastLogin;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "preferences", columnDefinition = "jsonb")
-    public String preferences; // JSON serialized UserPreferences
+    public Map<String, Object> preferences;
 
     @PrePersist
     public void prePersist() {

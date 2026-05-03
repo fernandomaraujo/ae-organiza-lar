@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -117,6 +118,7 @@ public class AuthService {
             user.email = email;
             user.name = email.split("@")[0];
             user.createdAt = now;
+            user.preferences = new HashMap<>();
         }
         user.lastLogin = now;
         user.persist();
