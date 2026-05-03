@@ -1,0 +1,26 @@
+<section class="auth-card">
+  <h1>Entrar com e-mail</h1>
+  <p>Digite seu e-mail para receber o código de acesso.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label for="email">E-mail</label>
+    <input id="email" type="email" formControlName="email" placeholder="voce@email.com" />
+
+    @if (form.controls.email.touched && form.controls.email.invalid) {
+      <p class="error">Informe um e-mail válido.</p>
+    }
+
+    <button type="submit" [disabled]="loading()">
+      {{ loading() ? 'Enviando...' : 'Enviar código' }}
+    </button>
+  </form>
+
+  @if (message()) {
+    <p class="success">{{ message() }}</p>
+  }
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+</section>
+

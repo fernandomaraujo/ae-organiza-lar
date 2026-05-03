@@ -1,0 +1,105 @@
+<section class="page-header">
+  <div>
+    <h1>Lares</h1>
+    <p>Cadastre os lugares onde você mora ou ajuda nas responsabilidades domésticas.</p>
+  </div>
+</section>
+
+<section class="grid">
+  <article class="panel form-panel">
+    <div class="panel-header">
+      <div>
+        <h2>{{ isEditing ? 'Editar lar' : 'Novo lar' }}</h2>
+        <p>Informe nome e uma descrição opcional para organizar melhor suas tarefas.</p>
+      </div>
+
+      @if (isEditing) {
+        <button type="button" class="secondary" (click)="cancelEdit()">Cancelar</button>
+      }
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label for="name">Nome do lar</label>
+      <input id="name" type="text" formControlName="name" placeholder="Ex.: Minha casa, Casa dos pais" />
+
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <p class="field-error">O nome deve ter entre 2 e 255 caracteres.</p>
+      }
+
+      <label for="description">Descrição</label>
+      <textarea
+        id="description"
+        rows="5"
+        formControlName="description"
+        placeholder="Ex.: Lar principal, casa onde visito aos finais de semana..."
+      ></textarea>
+
+      <div class="hint-row">
+        <span>Máximo de 500 caracteres.</span>
+        <span>{{ form.controls.description.value.length }}/500</span>
+      </div>
+
+      @if (form.controls.description.touched && form.controls.description.invalid) {
+        <p class="field-error">A descrição não pode ultrapassar 500 caracteres.</p>
+      }
+
+      <div class="actions">
+        <button type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Salvando...' : (isEditing ? 'Salvar alterações' : 'Criar lar') }}
+        </button>
+      </div>
+    </form>
+
+    @if (success()) {
+      <p class="success">{{ success() }}</p>
+    }
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+  </article>
+
+  <article class="panel list-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Meus lares</h2>
+        <p>{{ homes().length }} cadastrado(s)</p>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <p>Carregando lares...</p>
+    } @else if (!homes().length) {
+      <div class="empty-state">
+        <p>Você ainda não cadastrou nenhum lar.</p>
+        <p>Crie o primeiro para começar a planejar suas tarefas.</p>
+      </div>
+    } @else {
+      <div class="home-list">
+        @for (home of homes(); track trackByHomeId($index, home)) {
+          <section class="home-card">
+            <div class="home-card__content">
+              <div class="home-card__title-row">
+                <h3>{{ home.name }}</h3>
+                @if (editingId() === home.id) {
+                  <span class="badge">Em edição</span>
+                }
+              </div>
+
+              <p>{{ home.description || 'Sem descrição informada.' }}</p>
+              <small>Criado em {{ home.createdAt }}</small>
+            </div>
+
+            <div class="card-actions">
+              <button type="button" class="secondary" (click)="startEdit(home)">Editar</button>
+              <button type="button" class="danger" [disabled]="deletingId() === home.id" (click)="deleteHome(home)">
+                {{ deletingId() === home.id ? 'Excluindo...' : 'Excluir' }}
+              </button>
+            </div>
+          </section>
+        }
+      </div>
+    }
+  </article>
+</section>
+

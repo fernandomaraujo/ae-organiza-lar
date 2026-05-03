@@ -1,0 +1,27 @@
+<section class="auth-card">
+  <h1>Verificar código</h1>
+  <p>Insira o código de 6 dígitos enviado para seu e-mail.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label for="email">E-mail</label>
+    <input id="email" type="email" formControlName="email" />
+
+    <label for="code">Código</label>
+    <input id="code" type="text" maxlength="6" formControlName="code" placeholder="123456" />
+
+    @if (form.controls.code.touched && form.controls.code.invalid) {
+      <p class="error">Digite um código com 6 dígitos.</p>
+    }
+
+    <button type="submit" [disabled]="loading()">
+      {{ loading() ? 'Validando...' : 'Entrar' }}
+    </button>
+  </form>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <a routerLink="/login">Voltar para login</a>
+</section>
+

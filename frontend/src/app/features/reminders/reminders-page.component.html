@@ -1,0 +1,23 @@
+<section class="panel">
+  <h1>Lembretes</h1>
+
+  @if (loading()) {
+    <p>Carregando informações...</p>
+  } @else if (info()) {
+    <p><strong>Agenda:</strong> {{ info()?.schedule }}</p>
+    <p>{{ info()?.description }}</p>
+  }
+
+  <button type="button" [disabled]="sending()" (click)="sendNow()">
+    {{ sending() ? 'Enviando...' : 'Enviar planejamento agora' }}
+  </button>
+
+  @if (message()) {
+    <p class="success">{{ message() }}</p>
+  }
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+</section>
+

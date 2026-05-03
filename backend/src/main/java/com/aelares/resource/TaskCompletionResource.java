@@ -7,6 +7,7 @@ import com.aelares.dto.response.WeeklyPlanResponse;
 import com.aelares.exception.ResourceNotFoundException;
 import com.aelares.exception.UnauthorizedException;
 import com.aelares.service.AuthService;
+import com.aelares.service.HomeService;
 import com.aelares.service.TaskCompletionService;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -33,6 +34,9 @@ public class TaskCompletionResource {
     @Inject
     AuthService authService;
 
+    @Inject
+    HomeService homeService;
+
     /**
      * POST /api/v1/homes/{homeId}/tasks/{taskId}/completions
      * Marca a tarefa como concluída numa data específica.
@@ -44,9 +48,10 @@ public class TaskCompletionResource {
             @HeaderParam("Authorization") String authHeader,
             @Valid TaskCompletionRequest request) {
         try {
-            requireAuth(authHeader);
+            UUID userId = requireAuth(authHeader);
             UUID hId = UUID.fromString(homeId);
             UUID tId = UUID.fromString(taskId);
+            homeService.validateHomeOwnership(hId, userId);
 
             TaskCompletionResponse resp = completionService.completeTask(hId, tId, request);
             return Response.status(Response.Status.CREATED).entity(resp).build();
@@ -71,10 +76,11 @@ public class TaskCompletionResource {
             @PathParam("date") String date,
             @HeaderParam("Authorization") String authHeader) {
         try {
-            requireAuth(authHeader);
+            UUID userId = requireAuth(authHeader);
             UUID hId = UUID.fromString(homeId);
             UUID tId = UUID.fromString(taskId);
             LocalDate completionDate = LocalDate.parse(date);
+            homeService.validateHomeOwnership(hId, userId);
 
             completionService.uncompleteTask(hId, tId, completionDate);
             return Response.noContent().build();
@@ -99,9 +105,10 @@ public class TaskCompletionResource {
             @QueryParam("from") String from,
             @QueryParam("to") String to) {
         try {
-            requireAuth(authHeader);
+            UUID userId = requireAuth(authHeader);
             UUID hId = UUID.fromString(homeId);
             UUID tId = UUID.fromString(taskId);
+            homeService.validateHomeOwnership(hId, userId);
 
             LocalDate fromDate = from != null ? LocalDate.parse(from) : LocalDate.now().withDayOfMonth(1);
             LocalDate toDate = to != null ? LocalDate.parse(to) : LocalDate.now();
@@ -119,7 +126,7 @@ public class TaskCompletionResource {
 
     // --- helpers ---
 
-    private void requireAuth(String authHeader) {
+    private UUID requireAuth(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new UnauthorizedException("Token não fornecido");
         }
@@ -127,6 +134,7 @@ public class TaskCompletionResource {
         if (!authService.isTokenValid(token)) {
             throw new UnauthorizedException("Token inválido ou expirado");
         }
+        return authService.extractUserIdFromToken(token);
     }
 
     private Response unauthorized(String msg) {

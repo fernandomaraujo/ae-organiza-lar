@@ -1,0 +1,61 @@
+:host {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 16px;
+}
+
+.auth-card {
+  width: min(420px, 100%);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+h1 {
+  margin: 0 0 8px;
+}
+
+p {
+  color: #475569;
+}
+
+form {
+  margin-top: 20px;
+  display: grid;
+  gap: 10px;
+}
+
+input,
+button {
+  border-radius: 8px;
+  padding: 10px;
+  font: inherit;
+}
+
+input {
+  border: 1px solid #cbd5e1;
+}
+
+button {
+  border: 0;
+  background: #0ea5e9;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #dc2626;
+}
+
+.success {
+  color: #16a34a;
+}
+

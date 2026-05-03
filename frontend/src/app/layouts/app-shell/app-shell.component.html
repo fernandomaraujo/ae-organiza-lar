@@ -1,0 +1,17 @@
+<header class="topbar">
+  <div class="brand">AE Organiza Lar</div>
+
+  <nav class="menu">
+    <a routerLink="/home" routerLinkActive="active">Início</a>
+    <a routerLink="/homes" routerLinkActive="active">Lares</a>
+    <a routerLink="/tasks" routerLinkActive="active">Tarefas</a>
+    <a routerLink="/reminders" routerLinkActive="active">Lembretes</a>
+  </nav>
+
+  <button type="button" (click)="logout()">Sair</button>
+</header>
+
+<main class="content">
+  <router-outlet></router-outlet>
+</main>
+

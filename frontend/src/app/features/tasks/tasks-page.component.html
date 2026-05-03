@@ -1,0 +1,242 @@
+<section class="page-header">
+  <div>
+    <h1>Tarefas semanais</h1>
+    <p>Organize os afazeres domésticos por lar e por dia da semana.</p>
+  </div>
+</section>
+
+@if (homesLoading()) {
+  <section class="panel">
+    <p>Carregando lares...</p>
+  </section>
+} @else if (!homes().length) {
+  <section class="panel empty-state">
+    <h2>Nenhum lar cadastrado</h2>
+    <p>Crie um lar antes de cadastrar tarefas semanais.</p>
+    <a routerLink="/homes">Ir para lares</a>
+  </section>
+} @else {
+  <section class="toolbar panel">
+    <div class="toolbar__group">
+      <label for="homeId">Lar</label>
+      <select id="homeId" [value]="selectedHomeId() ?? ''" (change)="onHomeChange($any($event.target).value)">
+        @for (home of homes(); track home.id) {
+          <option [value]="home.id">{{ home.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="toolbar__group">
+      <label for="referenceDate">Data de referência</label>
+      <input id="referenceDate" type="date" [value]="referenceDate()" (change)="onReferenceDateChange($any($event.target).value)" />
+      @if (weeklyPlan()) {
+        <small class="helper-text">Semana exibida: {{ formatWeekRange() }}</small>
+      }
+    </div>
+
+    <div class="toolbar__group toolbar__group--wide">
+      <span class="label">Filtro por dia</span>
+      <div class="day-filters">
+        <button type="button" [class.active]="selectedDay() === null" class="secondary chip" (click)="onDayFilterChange(null)">
+          Todos
+        </button>
+
+        @for (day of dayOptions; track day.value) {
+          <button
+            type="button"
+            class="secondary chip"
+            [class.active]="selectedDay() === day.value"
+            (click)="onDayFilterChange(day.value)">
+            {{ day.shortLabel }}
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <article class="panel form-panel">
+      <div class="panel-header">
+        <div>
+          <h2>{{ isEditing ? 'Editar tarefa' : 'Nova tarefa' }}</h2>
+          <p>
+            Lar selecionado:
+            <strong>{{ selectedHome?.name }}</strong>
+          </p>
+        </div>
+
+        @if (isEditing) {
+          <button type="button" class="secondary" (click)="cancelEdit()">Cancelar</button>
+        }
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <label for="title">Título</label>
+        <input id="title" type="text" formControlName="title" placeholder="Ex.: Lavar roupa" />
+
+        @if (form.controls.title.touched && form.controls.title.invalid) {
+          <p class="field-error">O título deve ter entre 2 e 255 caracteres.</p>
+        }
+
+        <label for="dayOfWeek">Dia da semana</label>
+        <select id="dayOfWeek" formControlName="dayOfWeek">
+          @for (day of dayOptions; track day.value) {
+            <option [value]="day.value">{{ day.label }}</option>
+          }
+        </select>
+
+        <label for="priority">Prioridade</label>
+        <select id="priority" formControlName="priority">
+          @for (priority of priorityOptions; track priority) {
+            <option [value]="priority">{{ priorityLabel(priority) }}</option>
+          }
+        </select>
+
+        <label for="description">Descrição</label>
+        <textarea id="description" rows="4" formControlName="description" placeholder="Detalhes da tarefa"></textarea>
+
+        <div class="hint-row">
+          <span>Máximo de 1000 caracteres.</span>
+          <span>{{ form.controls.description.value.length }}/1000</span>
+        </div>
+
+        <label for="notes">Notas</label>
+        <textarea id="notes" rows="4" formControlName="notes" placeholder="Observações adicionais"></textarea>
+
+        <div class="hint-row">
+          <span>Máximo de 500 caracteres.</span>
+          <span>{{ form.controls.notes.value.length }}/500</span>
+        </div>
+
+        <div class="actions">
+          <button type="submit" [disabled]="submitting()">
+            {{ submitting() ? 'Salvando...' : (isEditing ? 'Salvar alterações' : 'Criar tarefa') }}
+          </button>
+        </div>
+      </form>
+
+      @if (success()) {
+        <p class="success">{{ success() }}</p>
+      }
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+    </article>
+
+    <article class="panel list-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Visão semanal</h2>
+          <p>
+            @if (selectedDay() === null) {
+              Exibindo todos os dias da semana selecionada
+            } @else {
+              Exibindo {{ formatDay(selectedDay()!) }} da semana selecionada
+            }
+          </p>
+        </div>
+      </div>
+
+      @if (tasksLoading() || planLoading()) {
+        <p>Carregando tarefas e status de conclusão...</p>
+      } @else if (!tasks().length) {
+        <div class="empty-state empty-state--soft">
+          <p>Nenhuma tarefa encontrada para o filtro atual.</p>
+        </div>
+      } @else {
+        <div class="week-grid">
+          @for (dayGroup of groupedTasksByDay(); track dayGroup.dayOfWeek) {
+            <section class="day-column">
+              <header class="day-column__header">
+                <div>
+                  <h3>{{ dayGroup.dayName }}</h3>
+                  @if (dayGroup.date) {
+                    <small>{{ formatShortDate(dayGroup.date) }}</small>
+                  }
+                </div>
+                <span class="task-count">{{ dayGroup.tasks.length }} tarefa(s)</span>
+              </header>
+
+              @if (!dayGroup.tasks.length) {
+                <div class="empty-state empty-state--soft day-empty">
+                  <p>Nenhuma tarefa neste dia.</p>
+                </div>
+              } @else {
+                <div class="task-list">
+                  @for (task of dayGroup.tasks; track trackByTaskId($index, task)) {
+                    <section class="task-card">
+                      <div class="task-card__content">
+                        <div class="task-card__header">
+                          <div>
+                            <h4>{{ task.title }}</h4>
+                            <p class="task-meta">
+                              <span class="priority-badge priority-badge--{{ task.schedule.priority.toLowerCase() }}">
+                                {{ priorityLabel(task.schedule.priority) }}
+                              </span>
+                              @if (task.completed) {
+                                <span class="status-badge status-badge--done">Concluída</span>
+                              } @else {
+                                <span class="status-badge status-badge--pending">Pendente</span>
+                              }
+                              @if (editingTaskId() === task.id) {
+                                <span class="badge">Em edição</span>
+                              }
+                            </p>
+                          </div>
+                        </div>
+
+                        <p>{{ task.description || 'Sem descrição informada.' }}</p>
+
+                        @if (task.schedule.notes) {
+                          <p class="notes"><strong>Notas:</strong> {{ task.schedule.notes }}</p>
+                        }
+
+                        @if (task.occurrenceDate) {
+                          <p class="occurrence"><strong>Data desta ocorrência:</strong> {{ formatShortDate(task.occurrenceDate) }}</p>
+                        }
+
+                        @if (task.completed && task.completion) {
+                          <p class="completion-meta">
+                            Concluída em {{ formatDate(task.completion.completedAt) }}
+                          </p>
+                        }
+
+                        <small>Atualizada em {{ formatDate(task.updatedAt) }}</small>
+                      </div>
+
+                      <div class="card-actions">
+                        <button
+                          type="button"
+                          class="success-action"
+                          [disabled]="completionTaskId() === task.id || !task.occurrenceDate"
+                          (click)="toggleCompletion(task)">
+                          @if (completionTaskId() === task.id) {
+                            Atualizando...
+                          } @else if (task.completed) {
+                            Desmarcar conclusão
+                          } @else {
+                            Marcar como concluída
+                          }
+                        </button>
+                        <button type="button" class="secondary" (click)="startEdit(task)">Editar</button>
+                        <button
+                          type="button"
+                          class="danger"
+                          [disabled]="deletingTaskId() === task.id"
+                          (click)="deleteTask(task)">
+                          {{ deletingTaskId() === task.id ? 'Excluindo...' : 'Excluir' }}
+                        </button>
+                      </div>
+                    </section>
+                  }
+                </div>
+              }
+            </section>
+          }
+        </div>
+      }
+    </article>
+  </section>
+}
+

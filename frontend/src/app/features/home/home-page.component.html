@@ -1,0 +1,13 @@
+<section class="panel">
+  <h1>Painel inicial</h1>
+
+  @if (loading()) {
+    <p>Carregando dados da sessão...</p>
+  } @else if (error()) {
+    <p class="error">{{ error() }}</p>
+  } @else {
+    <p>Bem-vindo, <strong>{{ user()?.email }}</strong>.</p>
+    <p>Use o menu para acessar lares, tarefas e lembretes.</p>
+  }
+</section>
+
