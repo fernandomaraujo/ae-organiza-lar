@@ -1,6 +1,7 @@
 package com.aelares.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
@@ -13,7 +14,7 @@ public class CreateTaskRequest {
     @Size(max = 1000, message = "Descrição não pode exceder 1000 caracteres")
     public String description;
 
-    @NotBlank(message = "Dia da semana é obrigatório")
+    @NotNull(message = "Dia da semana é obrigatório")
     @Min(value = 1, message = "Dia da semana deve ser entre 1 e 7")
     @Max(value = 7, message = "Dia da semana deve ser entre 1 e 7")
     public Integer dayOfWeek;

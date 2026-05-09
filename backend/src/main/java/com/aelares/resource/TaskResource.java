@@ -55,24 +55,28 @@ public class TaskResource {
                 tasks = taskService.getTasksByHomeId(hId);
             }
 
-            return Response.ok(tasks).build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                .entity(new ErrorResponse("ID invalido", Response.Status.BAD_REQUEST.getStatusCode()))
-                .build();
-        } catch (com.aelares.exception.ResourceNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
-                .build();
-        } catch (UnauthorizedException e) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
-                .build();
-        }
-    }
+             return Response.ok(tasks).build();
+         } catch (IllegalArgumentException e) {
+             return Response.status(Response.Status.BAD_REQUEST)
+                 .entity(new ErrorResponse("ID invalido", Response.Status.BAD_REQUEST.getStatusCode()))
+                 .build();
+         } catch (com.aelares.exception.ResourceNotFoundException e) {
+             return Response.status(Response.Status.NOT_FOUND)
+                 .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
+                 .build();
+         } catch (UnauthorizedException e) {
+             return Response.status(Response.Status.UNAUTHORIZED)
+                 .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                 .build();
+         } catch (Exception e) {
+             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                 .entity(new ErrorResponse("Erro ao listar tarefas: " + e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()))
+                 .build();
+         }
+     }
 
-    /**
-     * POST /api/v1/homes/{homeId}/tasks - Cria uma nova tarefa
+     /**
+      * POST /api/v1/homes/{homeId}/tasks - Cria uma nova tarefa
      */
     @POST
     public Response createTask(
@@ -99,6 +103,11 @@ public class TaskResource {
             return Response
                 .status(Response.Status.UNAUTHORIZED)
                 .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                .build();
+        } catch (Exception e) {
+            return Response
+                .status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(new ErrorResponse("Erro ao criar tarefa: " + e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()))
                 .build();
         }
     }
@@ -129,15 +138,19 @@ public class TaskResource {
             return Response.status(Response.Status.NOT_FOUND)
                 .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
                 .build();
-        } catch (UnauthorizedException e) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
-                .build();
-        }
-    }
+         } catch (UnauthorizedException e) {
+             return Response.status(Response.Status.UNAUTHORIZED)
+                 .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                 .build();
+         } catch (Exception e) {
+             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                 .entity(new ErrorResponse("Erro ao buscar tarefa: " + e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()))
+                 .build();
+         }
+     }
 
-    /**
-     * PUT /api/v1/homes/{homeId}/tasks/{taskId} - Atualiza uma tarefa
+     /**
+      * PUT /api/v1/homes/{homeId}/tasks/{taskId} - Atualiza uma tarefa
      */
     @PUT
     @Path("/{taskId}")
@@ -163,15 +176,19 @@ public class TaskResource {
             return Response.status(Response.Status.NOT_FOUND)
                 .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
                 .build();
-        } catch (UnauthorizedException e) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
-                .build();
-        }
-    }
+         } catch (UnauthorizedException e) {
+             return Response.status(Response.Status.UNAUTHORIZED)
+                 .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                 .build();
+         } catch (Exception e) {
+             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                 .entity(new ErrorResponse("Erro ao atualizar tarefa: " + e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()))
+                 .build();
+         }
+     }
 
-    /**
-     * DELETE /api/v1/homes/{homeId}/tasks/{taskId} - Deleta uma tarefa
+     /**
+      * DELETE /api/v1/homes/{homeId}/tasks/{taskId} - Deleta uma tarefa
      */
     @DELETE
     @Path("/{taskId}")
@@ -196,14 +213,18 @@ public class TaskResource {
             return Response.status(Response.Status.NOT_FOUND)
                 .entity(new ErrorResponse(e.getMessage(), Response.Status.NOT_FOUND.getStatusCode()))
                 .build();
-        } catch (UnauthorizedException e) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
-                .build();
-        }
-    }
+         } catch (UnauthorizedException e) {
+             return Response.status(Response.Status.UNAUTHORIZED)
+                 .entity(new ErrorResponse(e.getMessage(), Response.Status.UNAUTHORIZED.getStatusCode()))
+                 .build();
+         } catch (Exception e) {
+             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                 .entity(new ErrorResponse("Erro ao deletar tarefa: " + e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()))
+                 .build();
+         }
+     }
 
-    private UUID extractUserIdFromToken(String authHeader) {
+     private UUID extractUserIdFromToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new UnauthorizedException("Token nao fornecido");
         }
