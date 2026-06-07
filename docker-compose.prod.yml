@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ae-organiza-lar-backend-prod
+    ports:
+      - "8080:8080"
+    environment:
+      QUARKUS_PROFILE: prod
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-aelares_db}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-noreply@aelares.com}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    depends_on:
+      - postgres
+    networks:
+      - aelares-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ae-organiza-lar-frontend-prod
+    ports:
+      - "3000:80"
+    environment:
+      API_URL: http://localhost:8080
+    depends_on:
+      - backend
+    networks:
+      - aelares-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: ae-organiza-lar-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-aelares_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - aelares-network
+
+volumes:
+  postgres_data:
+
+networks:
+  aelares-network:
+    driver: bridge
+

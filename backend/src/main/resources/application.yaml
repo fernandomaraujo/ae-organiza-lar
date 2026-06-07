@@ -15,13 +15,13 @@ quarkus:
     path: /swagger-ui
     title: "AE Organiza Lar — Swagger UI"
 
-  # Database Configuration
+  # Database Configuration (defaults para dev, sobrescrito em prod)
   datasource:
     db-kind: postgresql
-    username: aelares_user
-    password: aelares_password
+    username: ${DB_USER:aelares_user}
+    password: ${DB_PASSWORD:aelares_password}
     jdbc:
-      url: jdbc:postgresql://localhost:5432/aelares_db
+      url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:aelares_db}
 
   # ORM/Hibernate Configuration
   hibernate-orm:
@@ -46,12 +46,12 @@ quarkus:
 
   # Email Configuration (SendGrid)
   mailer:
-    host: smtp.sendgrid.net
-    port: 587
+    host: ${SMTP_HOST:smtp.sendgrid.net}
+    port: ${SMTP_PORT:587}
     ssl: false
-    username: apikey
+    username: ${SMTP_USERNAME:apikey}
     password: ${SENDGRID_API_KEY:SG.test-key}
-    from: noreply@aelares.com
+    from: ${SENDGRID_FROM_EMAIL:noreply@aelares.com}
     trust-all: false
 
   # CORS Configuration
@@ -60,10 +60,11 @@ quarkus:
       proactive: false
     cors:
       enabled: true
-      origins: http://localhost:4200,http://localhost:8080
-      methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
-      headers: Content-Type,Authorization
+      origins: ${CORS_ORIGINS:http://localhost:4200,http://localhost:8080}
+      methods: GET,POST,PUT,DELETE,OPTIONS,PATCH,HEAD
+      headers: Content-Type,Authorization,Accept
       credentials: true
+      access-control-max-age: 24H
 
   # Logging
   log:
@@ -88,13 +89,13 @@ app:
     otp-request-window-minutes: 10
     otp-request-max-attempts: 5
     otp-request-max-attempts-per-ip: 20
-    jwt-secret: ${JWT_SECRET:your-secret-key-change-in-production}
+    jwt-secret: ${JWT_SECRET:dev-secret-key-change-in-production}
 
   email:
     enable-async: true
 
   cors:
-    allowed-origins: http://localhost:4200,http://localhost:8080
+    allowed-origins: ${CORS_ORIGINS:http://localhost:4200,http://localhost:8080}
 
   reminder:
     scheduler-interval: 1m

@@ -1,0 +1,6 @@
+{
+  "name": "ae-organiza-lar-backend",
+  "buildCommand": "mvn clean package -DskipTests -Dquarkus.package.type=jar",
+  "startCommand": "java -jar target/quarkus-app/quarkus-run.jar"
+}
+
