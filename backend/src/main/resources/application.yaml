@@ -33,16 +33,7 @@ quarkus:
   flyway:
     migrate-at-start: true
     locations: classpath:db/migration
-
-  # JWT Configuration
-  smallrye-jwt:
-    sign:
-      key-location: file:${user.home}/.ae-organiza-lar/jwt-key.pem
-    verify:
-      key-location: file:${user.home}/.ae-organiza-lar/jwt-key.pub.pem
-    algorithm: RS256
-    issuer: https://aelares.com
-    audience: aelares-api
+    baseline-on-migrate: true
 
   # Email Configuration (SendGrid)
   mailer:
@@ -63,7 +54,6 @@ quarkus:
       origins: ${CORS_ORIGINS:http://localhost:4200,http://localhost:8080}
       methods: GET,POST,PUT,DELETE,OPTIONS,PATCH,HEAD
       headers: Content-Type,Authorization,Accept
-      credentials: true
       access-control-max-age: 24H
 
   # Logging
@@ -106,4 +96,3 @@ app:
     log:
       console:
         json: true
-

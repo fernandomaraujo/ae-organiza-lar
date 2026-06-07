@@ -25,6 +25,7 @@ quarkus:
   flyway:
     migrate-at-start: true
     locations: classpath:db/migration
+    baseline-on-migrate: true
 
   # Email Configuration (SendGrid)
   mailer:
@@ -45,7 +46,6 @@ quarkus:
       origins: ${CORS_ORIGINS:https://aelares.railway.app}
       methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
       headers: Content-Type,Authorization
-      credentials: true
 
   # Logging
   log:
@@ -77,4 +77,3 @@ app:
 
   reminder:
     scheduler-interval: 1m
-
