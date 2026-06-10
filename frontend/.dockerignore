@@ -3,8 +3,6 @@ node_modules
 .gitignore
 .angular
 .prettierignore
-tsconfig.app.json
-tsconfig.spec.json
 **/*.spec.ts
 README.md
 
